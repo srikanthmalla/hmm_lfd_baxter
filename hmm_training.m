@@ -33,8 +33,9 @@ ids=[];
 for i=2:size(traj_lengths,1)
     ids= idx(traj_lengths(i-1):traj_lengths(i)-1);
 end
-idx=idx(find(diff(idx)));
-[trans, emis]=hmmestimate([idx], [idx]);
+
+[TRGUESS,EMITGUESS]=hmmestimate(idx, idx);
+[ESTTR,ESTEMIT] = hmmtrain(idx,TRGUESS,EMITGUESS);
 x=hmmgenerate(15,trans,emis);
 out=C(x(:),:);
 close all

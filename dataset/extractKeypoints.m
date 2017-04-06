@@ -1,3 +1,6 @@
+clc; close all; clear all;
+traj_plot=0;
+%% Key Point Extraction 
 numberOfDemonstartions = 5;
 keypoints = cell(1,numberOfDemonstartions);
 
@@ -5,8 +8,10 @@ for i = 1:numberOfDemonstartions
     file_name = ['trial' num2str(i) '_fk.csv'];
     full_trajectory = csvread(file_name);
     trajectory = full_trajectory(:,1:3);
-    plot3(trajectory(:,1),trajectory(:,2),trajectory(:,3));
-    grid on
+    if (traj_plot==1)   
+        plot3(trajectory(:,1),trajectory(:,2),trajectory(:,3));
+        grid on
+    end  
     hold on
     
     j = 1;
@@ -27,24 +32,26 @@ for i = 1:numberOfDemonstartions
 
         timeSinceLastKeypoint = timeSinceLastKeypoint + 1;
     end
-    
-    plot3(keypoints{i}(:,1),keypoints{i}(:,2),keypoints{i}(:,3),'m*', 'MarkerSize', 5);
-
+    if (traj_plot==1)   
+        plot3(keypoints{i}(:,1),keypoints{i}(:,2),keypoints{i}(:,3),'m*', 'MarkerSize', 5);
+    end
 end
 
-%%
-kmeans_keypoints = [keypoints{1}; keypoints{2}; keypoints{3}; keypoints{4}; keypoints{5}];
-[idx,C] = kmeans(kmeans_keypoints,10);
+%% K Means Clustering
+kmeans_keypoints = [keypoints{1};keypoints{2};keypoints{3};keypoints{4}; keypoints{5}];
+[idx,C] = kmeans(kmeans_keypoints,20);
 plot3(C(:,1),C(:,2),C(:,3),'kx','MarkerSize',15,'LineWidth',3);
-% % ids=[];
-% % for i=2:size(trajectory,1)
-% %     ids= idx(traj_lengths(i-1):traj_lengths(i)-1);
-% % end
-% % idx = idx(find(diff(idx)));
-% [trans, emis]=hmmestimate([idx], [idx]);
-% x = hmmgenerate(1500,trans,emis);
-% % x = x(find(diff(x)))
-% out=C(x(:),:);
-% % close all
-% hold on
-% plot3(out(:,1),out(:,2),out(:,3),'*-b')
+
+[TRGUESS,EMITGUESS]=hmmestimate([idx],[1:size(keypoints{1}) 1:size(keypoints{2}) 1:size(keypoints{3}) 1:size(keypoints{4}) 1:size(keypoints{5})]')
+x=hmmgenerate(19,TRGUESS,EMITGUESS)
+plot3(C(x,1),C(x,2),C(x,3),'rx-','MarkerSize',15,'LineWidth',3);
+
+%% Cubic Spline or DTW
+% dtw
+interpreted=C(x,:);
+% [dist,ix,iy]=dtw(interpreted',trajectory');
+% plot3(interpreted(ix,1),interpreted(ix,2),interpreted(ix,3),'rx-','MarkerSize',15,'LineWidth',3);
+% Cubic Spline
+hold on
+yy=cscvn(interpreted')
+fnplt(yy);
