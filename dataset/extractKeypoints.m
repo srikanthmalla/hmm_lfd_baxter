@@ -1,5 +1,6 @@
 clc; close all; clear all;
-traj_plot=0;
+traj_plot=1;
+
 %% Key Point Extraction 
 numberOfDemonstartions = 5;
 keypoints = cell(1,numberOfDemonstartions);
@@ -40,18 +41,19 @@ end
 %% K Means Clustering
 kmeans_keypoints = [keypoints{1};keypoints{2};keypoints{3};keypoints{4}; keypoints{5}];
 [idx,C] = kmeans(kmeans_keypoints,20);
-plot3(C(:,1),C(:,2),C(:,3),'kx','MarkerSize',15,'LineWidth',3);
+plot3(C(:,1),C(:,2),C(:,3),'ro','MarkerSize',10,'LineWidth', 2, 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'r');
 
-[TRGUESS,EMITGUESS]=hmmestimate([idx],[1:size(keypoints{1}) 1:size(keypoints{2}) 1:size(keypoints{3}) 1:size(keypoints{4}) 1:size(keypoints{5})]')
-x=hmmgenerate(19,TRGUESS,EMITGUESS)
+%% HMM
+[TRGUESS,EMITGUESS]=hmmestimate([idx],[1:size(keypoints{1}) 1:size(keypoints{2}) 1:size(keypoints{3}) 1:size(keypoints{4}) 1:size(keypoints{5})]');
+x=hmmgenerate(19,TRGUESS,EMITGUESS);
 plot3(C(x,1),C(x,2),C(x,3),'rx-','MarkerSize',15,'LineWidth',3);
 
-%% Cubic Spline or DTW
-% dtw
-interpreted=C(x,:);
-% [dist,ix,iy]=dtw(interpreted',trajectory');
-% plot3(interpreted(ix,1),interpreted(ix,2),interpreted(ix,3),'rx-','MarkerSize',15,'LineWidth',3);
-% Cubic Spline
-hold on
-yy=cscvn(interpreted')
-fnplt(yy);
+% %% Cubic Spline or DTW
+% % dtw
+% interpreted=C(x,:);
+% % [dist,ix,iy]=dtw(interpreted',trajectory');
+% % plot3(interpreted(ix,1),interpreted(ix,2),interpreted(ix,3),'rx-','MarkerSize',15,'LineWidth',3);
+% % Cubic Spline
+% hold on
+% yy=cscvn(interpreted')
+% fnplt(yy);
